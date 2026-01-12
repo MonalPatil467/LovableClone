@@ -8,5 +8,6 @@ public interface AuthService {
     AuthResponse signup(SignUpRequest request);
     //above method returns authResponse (response dto) and signUpRequest is the (requestDto)
 
+
     AuthResponse login(LoginRequest request);
 }

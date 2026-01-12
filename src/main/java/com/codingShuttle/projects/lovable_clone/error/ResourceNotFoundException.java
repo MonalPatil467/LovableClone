@@ -1,4 +1,14 @@
 package com.codingShuttle.projects.lovable_clone.error;
 
-public class ResourceNotFoundException {
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+@Getter
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true,level= AccessLevel.PRIVATE)
+public class ResourceNotFoundException extends RuntimeException{
+  String ResourceName;
+  Long ResourceId;
+
 }

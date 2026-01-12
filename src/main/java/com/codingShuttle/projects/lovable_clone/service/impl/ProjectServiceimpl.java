@@ -2,15 +2,21 @@ package com.codingShuttle.projects.lovable_clone.service.impl;
 
 import com.codingShuttle.projects.lovable_clone.dto.project.ProjectRequest;
 import com.codingShuttle.projects.lovable_clone.entity.Project;
+import com.codingShuttle.projects.lovable_clone.entity.ProjectMember;
+import com.codingShuttle.projects.lovable_clone.entity.ProjectMemberId;
 import com.codingShuttle.projects.lovable_clone.entity.User;
 import com.codingShuttle.projects.lovable_clone.dto.project.ProjectResponse;
 import com.codingShuttle.projects.lovable_clone.dto.project.ProjectSummaryResponse;
+import com.codingShuttle.projects.lovable_clone.enums.ProjectRole;
+import com.codingShuttle.projects.lovable_clone.error.ResourceNotFoundException;
 import com.codingShuttle.projects.lovable_clone.mapper.ProjectMapper;
+import com.codingShuttle.projects.lovable_clone.repository.ProjectMemberRepository;
 import com.codingShuttle.projects.lovable_clone.repository.ProjectRepository;
 import com.codingShuttle.projects.lovable_clone.repository.UserRepository;
 import com.codingShuttle.projects.lovable_clone.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
@@ -21,9 +27,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Builder
 @FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
 public class ProjectServiceimpl implements ProjectService {
 
@@ -31,6 +39,7 @@ public class ProjectServiceimpl implements ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
 
+    ProjectMemberRepository projectMemberRepository;
     @Override
     public @Nullable List<ProjectSummaryResponse> getUserProjects(Long userId) {
 
@@ -39,7 +48,7 @@ public class ProjectServiceimpl implements ProjectService {
          //       .stream()
            //     .map(projectMapper.toProjectSummaryResponse(project))
              //   .collect(Collectors.toList());
-        var projects=projectRepository.findAllAccesibleByUser(userId);
+        var projects=projectRepository.findAllAccessibleByUser(userId);
         return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
@@ -54,12 +63,21 @@ public class ProjectServiceimpl implements ProjectService {
        User owner=userRepository.findById(userId).orElseThrow();
        Project project= Project.builder()
                .name(request.name())
-               .owner(owner)
                .isPublic(false)
                .build();
        project=projectRepository.save(project);
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(projectMemberId)
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .acceptedAt(Instant.now())
+                .invitedAt(Instant.now())
+                .project(project)
+                .build();
+        projectMemberRepository.save(projectMember);
 
-       return projectMapper.toProjectResponse(project);
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
@@ -80,6 +98,7 @@ public class ProjectServiceimpl implements ProjectService {
         projectRepository.save(project);
     }
     public Project findAccessibleProjectById(Long projectId,Long userId){
-        return projectRepository.getAccessibleProjectById(projectId,userId).orElseThrow();
+        return projectRepository.findAccessibleProjectById(projectId,userId).
+                orElseThrow(()->new ResourceNotFoundException("Project", projectId));
     }
 }

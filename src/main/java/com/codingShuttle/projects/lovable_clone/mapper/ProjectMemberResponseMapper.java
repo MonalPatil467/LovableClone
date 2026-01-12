@@ -10,25 +10,15 @@ import org.mapstruct.Mapping;
 public interface ProjectMemberResponseMapper {
 
     // OWNER → MemberResponse
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "name", ignore = true)          // User has no 'name'
-    @Mapping(target = "avatarUrl", source = "avatarUrl")
-    @Mapping(target = "role", constant = "OWNER")
-    @Mapping(target = "invitedAt", ignore = true)
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "projectRole", constant = "OWNER")
     MemberResponse toProjectMemberResponseFromOwner(User owner);
 
-    // PROJECT MEMBER → MemberResponse
-    @Mapping(target = "id", source = "user.id")
-    @Mapping(target = "email", source = "user.email")
-    @Mapping(target = "name", ignore = true)          // User has no 'name'
-    @Mapping(target = "avatarUrl", source = "user.avatarUrl")
-    @Mapping(target = "role", source = "projectRole")
-    @Mapping(target = "invitedAt", source = "invitedAt")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "name", source = "user.name")
     MemberResponse toProjectMemberResponseFromMember(ProjectMember projectMember);
-
 }
-
 
 
 

@@ -1,6 +1,5 @@
 package com.codingShuttle.projects.lovable_clone.repository;
 
-import com.codingShuttle.projects.lovable_clone.dto.member.MemberResponse;
 import com.codingShuttle.projects.lovable_clone.entity.ProjectMember;
 import com.codingShuttle.projects.lovable_clone.entity.ProjectMemberId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, ProjectMemberId> {
-    List<ProjectMember> findByIdProjectId(Long projectId);
 
+    List<ProjectMember> findByIdProjectId(Long projectId);
 }
+
