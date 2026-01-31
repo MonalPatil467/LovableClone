@@ -13,6 +13,7 @@ import com.codingShuttle.projects.lovable_clone.mapper.ProjectMapper;
 import com.codingShuttle.projects.lovable_clone.repository.ProjectMemberRepository;
 import com.codingShuttle.projects.lovable_clone.repository.ProjectRepository;
 import com.codingShuttle.projects.lovable_clone.repository.UserRepository;
+import com.codingShuttle.projects.lovable_clone.security.AuthUtil;
 import com.codingShuttle.projects.lovable_clone.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -21,11 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -38,29 +39,37 @@ public class ProjectServiceimpl implements ProjectService {
     ProjectRepository projectRepository;
     UserRepository userRepository;
     ProjectMapper projectMapper;
+    AuthUtil authUtil;
 
     ProjectMemberRepository projectMemberRepository;
     @Override
-    public @Nullable List<ProjectSummaryResponse> getUserProjects(Long userId) {
+    public @Nullable List<ProjectSummaryResponse> getUserProjects() {
 
         //Project project;
        // return projectRepository.findAllAccesibleByUser(userId)
          //       .stream()
            //     .map(projectMapper.toProjectSummaryResponse(project))
              //   .collect(Collectors.toList());
+        Long userId=authUtil.getCurrentUserId();
         var projects=projectRepository.findAllAccessibleByUser(userId);
         return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
+
     @Override
-    public ProjectResponse getUserProjectsById(Long id, Long userId) {
+    @PreAuthorize("@security.canViewProject(#projectId)")// spell:-spring expression language;
+    // uses different compiler than java
+    public ProjectResponse getUserProjectsById(Long id) {
+        Long userId=authUtil.getCurrentUserId();
         Project project=findAccessibleProjectById(id,userId);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
-    public ProjectResponse createProject(ProjectRequest request, Long userId) {
+    public ProjectResponse createProject(ProjectRequest request) {
+        Long userId=authUtil.getCurrentUserId();
        User owner=userRepository.findById(userId).orElseThrow();
+
        Project project= Project.builder()
                .name(request.name())
                .isPublic(false)
@@ -81,7 +90,8 @@ public class ProjectServiceimpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
+    public ProjectResponse updateProject(Long id, ProjectRequest request) {
+        Long userId=authUtil.getCurrentUserId();
        Project project=findAccessibleProjectById(id,userId);
        project.setName(request.name());
       project= projectRepository.save(project);
@@ -89,16 +99,16 @@ public class ProjectServiceimpl implements ProjectService {
     }
 
     @Override
-    public void softDelete(Long id, Long userId) {
-        Project project=findAccessibleProjectById(id,userId);
-        if(!project.getOwner().getId().equals(userId)){
-         throw new RuntimeException("you are not allowed to delete");
-        }
+    @PreAuthorize("@security.canDeleteProject(#")
+    public void softDelete(Long id) {
+        Long userId = authUtil.getCurrentUserId();
+        Project project = findAccessibleProjectById(id, userId);
+
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }
     public Project findAccessibleProjectById(Long projectId,Long userId){
         return projectRepository.findAccessibleProjectById(projectId,userId).
-                orElseThrow(()->new ResourceNotFoundException("Project", projectId));
+                orElseThrow(()->new ResourceNotFoundException("Project", projectId.toString()));
     }
 }

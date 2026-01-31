@@ -27,8 +27,8 @@ public class ProjectMember {
     ProjectRole projectRole;
 
     @ManyToOne
-            @MapsId("userId")
-            User user;
+    @MapsId("userId")
+    User user;
 
     Instant createdAt;
 

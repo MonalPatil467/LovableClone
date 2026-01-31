@@ -13,10 +13,13 @@ import com.codingShuttle.projects.lovable_clone.repository.ProjectRepository;
 import com.codingShuttle.projects.lovable_clone.repository.UserRepository;
 import com.codingShuttle.projects.lovable_clone.security.AuthUtil;
 import com.codingShuttle.projects.lovable_clone.service.ProjectMemberService;
+import com.codingShuttle.projects.lovable_clone.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,10 +36,11 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     ProjectMemberResponseMapper projectMemberResponseMapper;
     UserRepository userRepository;
     AuthUtil authUtil;
-
+    ProjectService projectService;
 
 
     @Override
+    @PreAuthorize("@security.canViewMembers(#projectId")
     public List<MemberResponse> getProjectMembers(Long projectId) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -48,6 +52,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId")
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -78,6 +83,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId")
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -92,12 +98,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         return projectMemberResponseMapper.toProjectMemberResponseFromMember(projectMember);
     }
 
-    @Override
-    public MemberResponse deleteMemberRole(Long projectId, Long memberId, Long userId) {
-        return null;
-    }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId")
     public void removeProjectMember(Long projectId, Long memberId) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -109,6 +112,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
         projectMemberRepository.deleteById(projectMemberId);
     }
+
+
 
     ///  INTERNAL FUNCTIONS
 

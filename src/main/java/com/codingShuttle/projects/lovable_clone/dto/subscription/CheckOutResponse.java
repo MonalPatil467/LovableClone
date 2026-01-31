@@ -1,6 +1,9 @@
 package com.codingShuttle.projects.lovable_clone.dto.subscription;
 
 public record CheckOutResponse(
-        String checkouturl
+
+        String sessionId,
+        String checkoutUrl
+
 ) {
 }

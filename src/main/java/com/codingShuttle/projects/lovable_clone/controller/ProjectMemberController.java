@@ -50,7 +50,7 @@ public class ProjectMemberController {
             @PathVariable Long memberId)
     {
         Long userId=1L;
-        projectMemberService.deleteMemberRole(projectId,memberId,userId);
+        projectMemberService.removeProjectMember(projectId,memberId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -3,11 +3,9 @@ package com.codingShuttle.projects.lovable_clone.service;
 import com.codingShuttle.projects.lovable_clone.dto.subscription.CheckOutRequest;
 import com.codingShuttle.projects.lovable_clone.dto.subscription.CheckOutResponse;
 import com.codingShuttle.projects.lovable_clone.dto.subscription.PortalResponse;
-import com.codingShuttle.projects.lovable_clone.dto.subscription.SubscriptionResponse;
 
-public interface SubscriptionService {
+public interface PaymentProcessor  {
+    public CheckOutResponse createCheckoutSessionUrl(CheckOutRequest request) throws Throwable;
 
-    SubscriptionResponse getMySubscription();
-
-
+    public PortalResponse openCustomerPortal(Long userId);
 }
