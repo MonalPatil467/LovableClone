@@ -1,14 +1,17 @@
 package com.codingShuttle.projects.lovable_clone.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -19,18 +22,23 @@ import java.time.LocalDateTime;
 @FieldDefaults(level= AccessLevel.PRIVATE)
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
-     String email;
-     String passwordHash;
+    Long id;
 
-    String avatarUrl;
+    String username;
+    String password;
+    String name;
 
     @CreationTimestamp
     Instant createdAt;
 
     @UpdateTimestamp
-    Instant deletedAt;
-
-    //soft delete
     Instant updatedAt;
+
+    Instant deletedAt; //soft delete
+
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        return List.of();
+    }
 }

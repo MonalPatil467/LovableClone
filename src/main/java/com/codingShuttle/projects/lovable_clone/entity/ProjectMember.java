@@ -22,15 +22,18 @@ public class ProjectMember {
     @MapsId("projectId")
     Project project;
 
-    @ManyToOne
-    @MapsId("userId")
-    User user;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     ProjectRole projectRole;
 
+    @ManyToOne
+    @MapsId("userId")
+    User user;
+
+    Instant createdAt;
+
     Instant invitedAt;
+
     Instant acceptedAt;
 
 }
